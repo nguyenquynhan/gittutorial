@@ -4,7 +4,7 @@ function brandingService() {
         rootId: 'vTYSeNQpXki', //dev
         baseUrl: 'https://insiderfilesdev.soldenservices.com',
         homePath: '/',
-        nativeFileSharePath: '\\\\10.10.1.23\\TestShared',
+        nativeFileSharePath: '#nativeFileSharePath',
         nativeFileSharePathMac: 'smb://10.10.1.23/TestShared'
     }
 };
