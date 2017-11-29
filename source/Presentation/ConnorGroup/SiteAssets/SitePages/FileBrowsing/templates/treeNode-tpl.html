@@ -1,0 +1,14 @@
+﻿<div ng-class="{'dir-selected':vm.isSelected()}"  ng-click="vm.clickNode(vm.pathId)" id="{{vm.pathId}}">
+    <i ng-class="{expanded:'clickable fa fa-chevron-down', collapsed:'clickable fa fa-chevron-right'}[vm.state]" aria-hidden="true"></i>
+    <i ng-class="{expanded:'clickable fa fa-folder-open', collapsed:'clickable fa fa-folder'}[vm.state]" aria-hidden="true"></i>
+    <span class="clickable">{{vm.pathName}}</span>
+</div>
+<ul ng-show="vm.state == 'expanded'">
+    <li id="{{vm.generateContainerId(child.PathId)}}" ng-repeat="child in vm.parsedChildren">
+        <div ng-click="vm.clickNode(child.PathId)">
+            <i class="fa fa-chevron-right clickable" aria-hidden="true"></i>
+            <i class="fa fa-folder clickable" aria-hidden="true"></i>
+            <span class="clickable">{{child.DisplayName}}</span>
+        </div>
+    </li>
+</ul>

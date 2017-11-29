@@ -1,0 +1,26 @@
+﻿<md-dialog aria-label="Mango (Fruit)">
+    <form ng-cloak>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>{{vm.title}}</h2>
+                <span flex></span>
+                <i ng-click="vm.closeDialog()" style="color:#262626; cursor:pointer" class="fa fa-times" aria-hidden="true"></i>
+            </div>
+        </md-toolbar>
+
+        <md-dialog-content>
+            <div class="md-dialog-content">
+                {{vm.text}}
+            </div>
+        </md-dialog-content>
+
+        <md-dialog-actions layout="row">
+            <md-button id="dl-clipboard-button" ngclipboard data-clipboard-text="{{vm.text}}">
+                Copy to Clipboard
+            </md-button>
+            <md-button ng-click="vm.closeDialog()">
+                Close
+            </md-button>
+        </md-dialog-actions>
+    </form>
+</md-dialog>

@@ -1,0 +1,246 @@
+﻿<table style="width:100%" cellpadding="0" cellspacing="0">
+    <tr id="breadcrumb-panel">
+        <td>
+            <table class="control-panel">
+                <tr>
+                    <td class="breadcrumb-container" valign="middle">
+                        <span class="breadcrumb-node" ng-repeat="node in vm.breadcrumbNodes" ng-click="vm.navigateBreadcrumb(node)">
+                            {{node.name}}
+                            <i ng-if="$index < vm.breadcrumbNodes.length - 1" class="fa fa-angle-right" aria-hidden="true"></i>
+                        </span>
+                    </td>
+                    <td align="right" valign="middle" style="width:100px">
+                        <span class="adv-search-link" ng-click="vm.displayAdvSearch = !vm.displayAdvSearch">Advanced Search</span>
+                    </td>
+                    <td align="right" valign="middle" style="width:250px">
+                        <div class="has-feedback">
+                            <input class="form-control" type="text" placeholder="Search" ng-model="vm.searchText" 
+                                   ng-change="vm.filterFolder(vm.searchText)"
+                                   ng-model-options="{ debounce:300 }" />
+                            <span class="fa fa-search form-control-feedback"></span>
+                        </div>
+                    </td>
+                    <td align="right" valign="middle" style="width:40px">
+                        <i id="clipboard-button" title="Copy the server path to your clipboard to use in {{vm.deviceOS == 'mac' ? 'Finder' : 'Explorer'}}" ng-if="!vm.isMobile" ngclipboard data-clipboard-text="{{vm.getFileSharePath()}}" class="fa fa-clipboard" aria-hidden="true" ng-click="vm.displayCopiedMessage()"></i>
+                    </td>
+                    <td align="right" valign="middle" style="width:40px">
+                        <i ng-show="vm.displayMode == 'icon'" title="List view" ng-click="vm.setDisplayMode('list')" class="fa fa-th-list" aria-hidden="true"></i>
+                        <i ng-show="vm.displayMode == 'list'" title="Icon view" ng-click="vm.setDisplayMode('icon')" class="fa fa-th-large" aria-hidden="true"></i>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr style="height:41px">
+        <td>
+            <table class="control-panel">
+                <tr>
+                    <td align="left" style="width:40px" valign="middle">
+                        <i ng-show="vm.canBack" class="fa fa-arrow-left" aria-hidden="true" ng-click="vm.backward()"></i>
+                        <i ng-show="!vm.canBack" class="fa fa-arrow-left" aria-hidden="true" style="color:darkgrey"></i>
+                    </td>
+                    <td align="left" style="width:40px" valign="middle">
+                        <i ng-show="vm.canForward" class="fa fa-arrow-right" aria-hidden="true" ng-click="vm.forward()"></i>
+                        <i ng-show="!vm.canForward" class="fa fa-arrow-right" aria-hidden="true" style="color:darkgrey"></i>
+                    </td>
+                    <td align="left" style="width:40px" valign="middle">
+                        <i ng-show="vm.canUp" class="fa fa-arrow-up" aria-hidden="true" ng-click="vm.up()"></i>
+                        <i ng-show="!vm.canUp" class="fa fa-arrow-up" aria-hidden="true" style="color:darkgrey"></i>
+                    </td>
+                    <td align="right" style="font-size:15px;" valign="middle">
+                        <div ng-if="vm.displayMode != 'search'">
+                            <div ng-if="vm.items.length <= vm.pageSize"><strong>{{vm.items.length}}</strong> items</div>
+                            <div ng-if="vm.items.length > vm.pageSize">Showing: <strong>{{(vm.page - 1) * vm.pageSize + 1}}</strong> - <strong>{{vm.page * vm.pageSize < vm.totalRecord ? vm.page * vm.pageSize : vm.totalRecord}}</strong> of <strong>{{vm.totalRecord}}</strong> items</div>
+                        </div>
+                        <div ng-if="vm.displayMode == 'search'">
+                            <div ng-if="vm.totalRecord <= vm.pageSize"><strong>{{vm.totalRecord}}</strong> items</div>
+                            <div ng-if="vm.totalRecord > vm.pageSize">Showing:  items <strong>{{(vm.page - 1) * vm.pageSize + 1}}</strong> 
+                                - <strong>{{vm.page * vm.pageSize < vm.totalRecord ? vm.page * vm.pageSize : vm.totalRecord}}</strong> 
+                            </div>
+                        </div>
+                    </td>
+                    <td align="left" valign="middle" style="width:500px;">
+                        <div style="margin-left:37px" ng-if="vm.displayAdvSearch">
+                            <input type="checkbox" ng-model="vm.includeFoldersInSearch" ng-change="vm.filterFolder(vm.searchText)" /> Include folders
+                            <input type="checkbox" ng-model="vm.includeFilesInSearch" ng-change="vm.filterFolder(vm.searchText)" /> Include files
+                            <input type="checkbox" ng-model="vm.searchExactKeyword" ng-change="vm.filterFolder(vm.searchText)" /> Exact Match
+                            <input type="checkbox" ng-model="vm.searchOr" ng-change="vm.filterFolder(vm.searchText)" /> Search OR
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr id="content-panel">
+        <td id="top-container" style="width:100%;">
+            <table style="width:100%; height:100%;" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td id="left-col">
+                        <div style="height:100%;margin:0;padding:0;overflow:auto">
+                            <ul>
+                                <li id="li-root">
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                    <td id="right-col">
+                        <div style="height:100%;margin:0;padding:0;overflow:auto; overflow-x:hidden">
+                            <div ng-if="(vm.items.length > vm.pageSize && vm.displayMode != 'search' ) || (vm.totalRecord > vm.pageSize && vm.displayMode == 'search')">
+                                <div class="custom-paging" align="right" style="text-align:right !important">
+                                    <div style="margin-right: 10px; margin-top:5px;" paging
+                                         class="small"
+                                         page="vm.page"
+                                         page-size="vm.pageSize"
+                                         total="vm.totalRecord"
+                                         show-prev-next="true"
+                                         show-first-last="true"
+                                         adjacent="1"
+                                         text-next-class="fa fa-angle-right"
+                                         text-prev-class="fa fa-angle-left"
+                                         text-first-class="fa fa-angle-double-left"
+                                         text-last-class="fa fa-angle-double-right"
+                                         paging-action="vm.doPaging('Paging Clicked', page, pageSize, total)">
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="vm.displayMode == 'search'">
+                                <div ng-if="vm.totalRecord > 0" style="padding: 5px 0 0 10px"><i>Showing search results in <b>{{vm.currentPathName}}</b></i></div>
+                                <div ng-if="vm.totalRecord == 0" style="padding: 5px 0 0 10px"><i>No results found in <b>{{vm.currentPathName}}</b></i></div>
+                            </div>
+                            <div>
+                                <div style="width:100%" ng-if="vm.displayMode == 'icon'">
+                                    <ul style="padding:0">
+                                        <li class="float-item" ng-repeat="item in vm.pagingItems track by $index">
+                                            <div style="vertical-align:top">
+                                                <i style="cursor:pointer" ng-if="item.Type == 1" class="fa fa-folder" aria-hidden="true" ng-click="vm.doubleClickNode(item)"></i>
+                                                <md-menu ng-if="item.Type == 2" md-offset="20 20">
+                                                    <i ng-click="vm.openMenu($mdOpenMenu, $event)" ng-class="vm.getFileIconClass(item.DisplayName)" aria-hidden="true"></i>
+                                                    <md-menu-content width="2">
+                                                        <md-menu-item>
+                                                            <a style="color:black;text-decoration:none;" target="_blank" ng-href="{{vm.getDownLoadLink(item)}}">View</a>
+                                                        </md-menu-item>
+                                                        <md-menu-item ng-click="vm.getLink(item)">
+                                                            <div>Get Link</div>
+                                                        </md-menu-item>
+                                                    </md-menu-content>
+                                                </md-menu>
+                                                <div style="font-size:12px">
+                                                    {{item.DisplayName}}
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <table ng-if="vm.displayMode == 'list'" id="item-list" width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Size</th>
+                                        <th>Date modified</th>
+                                        <th>Date created</th>
+                                        <th>Created by</th>
+                                        <th></th>
+                                    </tr>
+                                    <tr ng-repeat="item in vm.pagingItems track by $index">
+                                        <td>
+                                            <span ng-if="item.Type == 1" style="cursor:pointer" ng-click="vm.doubleClickNode(item)"><i class="fa fa-folder" aria-hidden="true"></i>{{item.DisplayName}}</span>
+                                            <md-menu ng-if="item.Type == 2" md-offset="20 20">
+                                                <span ng-click="vm.openMenu($mdOpenMenu, $event)"><i ng-class="vm.getFileIconClass(item.DisplayName)" aria-hidden="true"></i>{{item.DisplayName}}</span>
+                                                <md-menu-content width="2">
+                                                    <md-menu-item>
+                                                        <a style="color:black" target="_blank" ng-href="{{vm.getDownLoadLink(item)}}">View</a>
+                                                    </md-menu-item>
+                                                    <md-menu-item ng-click="vm.getLink(item)">
+                                                        <div>Get Link</div>
+                                                    </md-menu-item>
+                                                </md-menu-content>
+                                            </md-menu>
+                                            
+                                        </td>
+                                        <td><span ng-if="item.Size != null">{{vm.formatDisplaySize(item.Size)}}</span></td>
+                                        <td>{{item.LastModified | date : "short"}}</td>
+                                        <td>{{item.CreatedAt? (item.CreatedAt | date : "short") : ''}}</td>
+                                        <td>{{item.CreatedByFullName || item.CreatedByFullSamName || ''}}</td>
+                                        <td>
+                                            <div ng-show="item.Type == 2">
+                                                <a style="color:black" target="_blank" ng-href="{{vm.getDownLoadLink(item)}}"><i title="View" style="cursor:pointer" class="fa fa-eye" aria-hidden="true"></i></a>
+                                                <i style="cursor:pointer" title="Get link" class="fa fa-link" aria-hidden="true" ng-click="vm.getLink(item)"></i>
+                                            </div>
+                                            <div ng-show="item.Type == 1">
+                                                <a style="color:black;visibility: hidden" target="_blank" ng-href="{{vm.getDownLoadLink(item)}}"><i title="View" style="cursor:pointer" class="fa fa-eye" aria-hidden="true"></i></a>
+                                                <i style="cursor:pointer" title="Get link" class="fa fa-link" aria-hidden="true" ng-click="vm.getLinkFolder(item)"></i>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <table ng-if="vm.displayMode == 'search'" id="item-list" width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Path</th>
+                                        <th></th>
+                                    </tr>
+                                    <tr ng-repeat="item in vm.pagingItems track by $index">
+                                        <td style="width:35%">
+                                            <span ng-if="item.Type == 1" style="cursor:pointer" ng-click="vm.navigateFromSearch(item)">
+                                                <i class="fa fa-folder" aria-hidden="true"></i>
+                                                <span ng-bind-html="item.DisplayName"></span>
+                                            </span>
+                                            <md-menu ng-if="item.Type == 2" md-offset="20 20">
+                                                <span ng-click="vm.openMenu($mdOpenMenu, $event)">
+                                                    <i ng-class="vm.getFileIconClass(item.DisplayName)" aria-hidden="true"></i>
+                                                    <span ng-bind-html="item.DisplayName"></span>
+                                                    <span ng-bind-html="vm.trustHTML(item.HighlightText)" style="display:block"></span>
+                                                </span>
+                                                <md-menu-content width="2">
+                                                    <md-menu-item>
+                                                        <a style="color:black" target="_blank" ng-href="{{vm.getDownLoadLink(item)}}">View</a>
+                                                    </md-menu-item>
+                                                    <md-menu-item ng-click="vm.getLink(item)">
+                                                        <div>Get Link</div>
+                                                    </md-menu-item>
+                                                </md-menu-content>
+                                            </md-menu>
+                                        </td>
+                                        <td style="width:50%"><span ng-bind-html="item.Path"></span></td>
+                                        <td style="width:15%">
+                                            <div ng-show="item.Type == 2">
+                                                <a style="color:black" target="_blank" ng-href="{{vm.getDownLoadLink(item)}}"><i title="View" style="cursor:pointer" class="fa fa-eye" aria-hidden="true"></i></a>
+                                                <i style="cursor:pointer" title="Get link" class="fa fa-link" aria-hidden="true" ng-click="vm.getLink(item)"></i>
+                                            </div>
+                                            <div ng-show="item.Type == 1">
+                                                <a style="color:black;visibility: hidden" target="_blank" ng-href="{{vm.getDownLoadLink(item)}}"><i title="View" style="cursor:pointer" class="fa fa-eye" aria-hidden="true"></i></a>
+                                                <i style="cursor:pointer" title="Get link" class="fa fa-link" aria-hidden="true" ng-click="vm.getLinkFolder(item)"></i>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div ng-if="(vm.items.length > vm.pageSize && vm.displayMode != 'search' ) || (vm.totalRecord > vm.pageSize && vm.displayMode == 'search')">
+                                <div class="custom-paging" align="right" style="text-align:right !important">
+                                    <div style="margin-right: 10px; margin-top:10px;" paging
+                                         class="small"
+                                         page="vm.page"
+                                         page-size="vm.pageSize"
+                                         total="vm.totalRecord"
+                                         show-prev-next="true"
+                                         show-first-last="true"
+                                         adjacent="1"
+                                         text-next-class="fa fa-angle-right"
+                                         text-prev-class="fa fa-angle-left"
+                                         text-first-class="fa fa-angle-double-left"
+                                         text-last-class="fa fa-angle-double-right"
+                                         paging-action="vm.doPaging('Paging Clicked', page, pageSize, total)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+
+
+
+
